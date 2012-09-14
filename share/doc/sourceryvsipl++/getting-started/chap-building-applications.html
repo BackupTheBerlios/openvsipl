@@ -1,0 +1,90 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter 4. Building Applications</title><link rel="stylesheet" href="cs.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.74.0"><meta name="description" content="Sourcery VSIPL++ comes with example programs, installed in the share/sourceryvsipl++ subdirectory. This chapter explains how to compile, link, and run these programs. You can modify these programs to develop your own Sourcery VSIPL++ applications."><link rel="home" href="index.html" title="Sourcery VSIPL++"><link rel="up" href="index.html" title="Sourcery VSIPL++"><link rel="prev" href="ch03s05.html" title="3.5. Building PDF Documentation"><link rel="next" href="building_with_make.html" title="4.2. Building with GNU Make"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 4. Building Applications</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s05.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="building_with_make.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="chap-building-applications"></a>Chapter 4. Building Applications</h2></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>
+     Sourcery VSIPL++ comes with example programs, installed in the
+     <code class="filename">share/sourceryvsipl++</code> subdirectory.  This chapter
+     explains how to compile, link, and run these programs.  You can
+     modify these programs to develop your own Sourcery VSIPL++
+     applications.
+    </p></div></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="chap-building-applications.html#building_manually">4.1. Building Manually</a></span></dt><dt><span class="section"><a href="building_with_make.html">4.2. Building with GNU Make</a></span></dt><dt><span class="section"><a href="ch04s03.html">4.3. Building with Microsoft Visual Studio</a></span></dt><dt><span class="section"><a href="ch04s04.html">4.4. Running Serial Applications</a></span></dt><dt><span class="section"><a href="ch04s05.html">4.5. Running Parallel Applications</a></span></dt><dt><span class="section"><a href="ch04s06.html">4.6. Building Applications with the VSIPL API</a></span></dt></dl></div><p>
+   This chapter assumes that you have installed Sourcery VSIPL++ in
+   <code class="filename">/opt/sourceryvsipl++-2.2-9</code>.  If you have
+   used a different path, you will have to adjust the filenames below
+   accordingly.  It is also assumed that the current directory is
+   writable by you.  For example, you can use your home directory or
+   <code class="filename">/tmp</code> as the current directory.  Finally, the
+   examples in this chapter assume that you are using the GNU C++
+   compiler.  If you are using another C++ compiler, you may have to
+   make minor changes to the commands shown.
+  </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="building_manually"></a>4.1. Building Manually</h2></div></div></div><p>
+     The file
+     <code class="filename">/opt/sourceryvsipl++-2.2-9/share/sourceryvsipl++/example1.cpp</code>
+     contains a very simple VSIPL++ program.  You can use this file as a
+     template for developing much more complex programs.
+    </p><p>
+     When building Sourcery VSIPL++ applications, you must ensure that your
+     compiler can find the necessary header and library files.  Since
+     Sourcery VSIPL++ may depend on other libraries, the easiest way to
+     determine the necessary compiler directives is with the
+     <span class="command"><strong>pkg-config</strong></span> command.
+    </p><p>
+     Before <span class="command"><strong>pkg-config</strong></span> can find information about
+     Sourcery VSIPL++, it is necessary to make sure that Sourcery
+     VSIPL++'s <code class="filename">lib/pkgconfig</code> subdirectory is in
+     <span class="command"><strong>pkg-config</strong></span>'s search path.  You can
+     check the search path by examining the <code class="envar">PKG_CONFIG_PATH</code>
+     environment variable.  To set the path:
+     </p><pre class="screen">&gt; export PKG_CONFIG_PATH=/opt/sourceryvsipl++-2.2-9/lib/pkgconfig</pre><p>
+    </p><p>
+     First, determine what compiler is recommended:
+     </p><pre class="screen">&gt; CXX=`pkg-config vsipl++ --variable=cxx`</pre><p>
+   </p><p>
+     Second, to compile the program, use the following command:
+     </p><pre class="screen">&gt; $CXX -c `pkg-config vsipl++ --cflags` \
+                          `pkg-config vsipl++ --variable=cxxflags` \
+      /opt/sourceryvsipl++-2.2-9/share/sourceryvsipl++/example1.cpp</pre><p>
+    </p><p>
+     Finally, to link the program, use the following command:
+     </p><pre class="screen">&gt; $CXX -o example1 example1.o `pkg-config --libs vsipl++`</pre><p>
+    </p><p>
+     Now that you have built the example program, you can run it like any
+     other program, with:
+     </p><pre class="screen">&gt; ./example1</pre><p>
+    </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id321126"></a>4.1.1. Using <span class="command"><strong>pkg-config</strong></span></h3></div></div></div><p>
+     When building applications, it is important to use the same C++
+     compiler that was used to build the Sourcery VSIPL++ library.  Different
+     C++ compilers, even different versions of the same compiler, may
+     have incompatible linking conventions or different standard library
+     implementations.  However, it is possible to determine the compiler
+     used to build Sourcery VSIPL++ via pkg-config:
+     </p><pre class="screen">&gt; pkg-config --variable=cxx vsipl++</pre><p>
+     Using this, the previous commands to compile and link the example
+     program become:
+</p><pre class="screen">&gt; `pkg-config --variable=cxx vsipl++` \
+          -c `pkg-config --cflags vsipl++`
+	  /opt/sourceryvsipl++-2.2-9/share/sourceryvsipl++/example1.cpp
+&gt; `pkg-config --variable=cxx vsipl++` \
+          -o example1 example1.o `pkg-config --libs vsipl++`</pre><p>
+    </p><p>
+     If pkg-config is not available on your system, you can specify the
+     search paths manually.  With most compilers, the
+     <code class="option">-I</code> switch can be used to specify directories
+     containing header files.  Use the following command to compile the
+     program:
+</p><pre class="screen">&gt; g++ -c -I /opt/vsip/include \
+      /opt/sourceryvsipl++-2.2-9/share/sourceryvsipl++/example1.cpp</pre><p>
+    </p><p>
+     To link the program manually, you must tell the compiler where to
+     find the libraries when linking.  For most compilers, the
+     <code class="option">-L</code> switch is used to specify directories to search
+     for libraries, while the <code class="option">-l</code> switch is used to
+     specify the names of libraries to use.  Use the following command
+     to link the program:
+     </p><pre class="screen">&gt; g++ -o example1 -L /opt/sourceryvsipl++-2.2-9/lib example1.o -l vsip</pre><p>
+    </p><p>
+     If Sourcery VSIPL++ was configured to use other libraries, such as MPI,
+     it will be necessary to manually specify <code class="option">-L</code> and
+     <code class="option">-l</code> options accordingly.  These necessary options
+     can be determined by looking in the
+     <code class="filename">/opt/sourceryvsipl++-2.2-9/lib/pkgconfig/vsipl++.pc</code> file.  It
+     contains a line prefixed with "Libs:" which indicates the libraries
+     necessary to link a Sourcery VSIPL++ program.
+    </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s05.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="building_with_make.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3.5. Building PDF Documentation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.2. Building with GNU Make</td></tr></table></div></body></html>

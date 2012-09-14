@@ -1,0 +1,132 @@
+########################################################################
+#
+# File:   apps/ssar/GNUmakefile.in
+# Author: Jules Bergmann
+# Date:   2008-09-20
+#
+# Contents: Makefile for in-tree SSAR build
+#
+########################################################################
+
+# The default precision is single (double may also be used)
+precision := single
+
+ifeq ($(precision),double)
+ref_image_base := ref_image_dp
+ssar_type := SSAR_BASE_TYPE=double
+else
+ref_image_base := ref_image_sp
+ssar_type := SSAR_BASE_TYPE=float
+endif
+
+srcdir := @srcdir@
+top_srcdir := @top_srcdir@
+top_builddir := @top_builddir@
+OBJEXT := @OBJEXT@
+
+vpath %.cpp $(srcdir)
+vpath %.hpp $(srcdir)
+
+cxx_sources := $(wildcard $(srcdir)/*.cpp)
+cxx_exclude := # $(srcdir)/tests/sumval-func.cpp
+
+objects := $(patsubst $(srcdir)/%.cpp, %.$(OBJEXT), $(cxx_sources))
+deps    := $(patsubst $(srcdir)/%.cpp, %.d, $(cxx_sources))
+tests   := $(patsubst $(srcdir)/%.cpp, %.test, $(cxx_sources))
+xtests  := $(patsubst $(srcdir)/%.cpp, %, $(cxx_sources))
+
+CXX     := @CXX@
+INC	:= -I$(top_builddir)/src -I$(top_srcdir)/src -I$(srcdir)
+PROF	:= -DVSIP_PROFILE_MATVEC -DVSIP_PROFILE_SIGNAL -DVSIP_PROFILE_USER
+CPPFLAGS:= $(INC) $(PROF) -D$(ssar_type) @CPPFLAGS@
+CXXFLAGS:= @CXXFLAGS@
+LIBS    := -lvsip_csl -lsvpp @LIBS@
+LDFLAGS := -L$(top_builddir)/lib @LDFLAGS@
+
+fmtprof := $(top_srcdir)/scripts/fmt-profile.pl
+
+########################################################################
+# Rules
+########################################################################
+
+all: ssar viewtopng diffview data
+
+clean: 
+	rm -f *.o
+	rm -f ssar
+	rm -f viewtopng
+	rm -f diffview
+
+data:
+	@echo "Populating build directory with input data files..."
+	mkdir -p data1
+	mkdir -p data3
+	cp -r $(srcdir)/data1/*.view ./data1
+	cp -r $(srcdir)/data1/dims.txt ./data1
+	cp -r $(srcdir)/data3/*.view ./data3
+	cp -r $(srcdir)/data3/dims.txt ./data3
+	cp $(srcdir)/make_images.sh .
+
+check: all
+	@echo "Running SSAR application..."
+	./ssar data3
+	@echo
+	@echo "Comparing output to reference view (should be less than -100)"
+	./diffview -r data3/image.view data3/$(ref_image_base).view 756 1144
+	@echo
+	@echo "Creating viewable image of output"
+	./viewtopng -s data3/image.view data3/image.png 1144 756
+	@echo "Creating viewable image of reference view"
+	./viewtopng -s data3/$(ref_image_base).view data3/$(ref_image_base).png 1144 756
+
+profile1: ssar viewtopng data
+	@echo "Profiling SSAR application (SCALE = 1)..."
+	./ssar data1 -loop 10 --vsip-profile-mode=accum --vsip-profile-output=profile.out
+	@echo "Formatting profiler output..."
+	${fmtprof}  -sec -o profile1.txt data1/profile.out
+	./make_images.sh data1 438 160 382 266
+
+profile3: ssar viewtopng data
+	@echo "Profiling SSAR application (SCALE = 3)..."
+	./ssar data3 -loop 10 --vsip-profile-mode=accum --vsip-profile-output=profile.out
+	@echo "Formatting profiler output..."
+	${fmtprof}  -sec -o profile3.txt data3/profile.out
+	./make_images.sh data3 1072 480 1144 756
+
+
+ssar.o: ssar.cpp kernel1.hpp
+
+ssar: ssar.o
+	@echo linking $@
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+viewtopng: viewtopng.o
+	@echo linking $@
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS) -lpng
+
+diffview: diffview.o
+	@echo linking $@
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+########################################################################
+# Implicit Rules
+########################################################################
+
+%.o: %.cpp
+	@echo compiling $(@D)/$(@F)
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
+
+%.s: %.cpp
+	@echo compiling $(@D)/$(@F)
+	$(CXX) -S $(CXXFLAGS) -o $@ $<
+
+%.d: %.cpp
+	@echo generating dependencies for $(@D)/$(<F)
+	$(SHELL) -ec '$(CXX) -M $(CPPFLAGS) $< \
+		      | sed "s|$(*F)\\.o[ :]*|$*\\.d $*\\.o : |g" > $@' \
+		|| rm -f $@
+
+ifeq (,$(filter $(MAKECMDGOALS), xtest clean xclean))
+include $(deps)
+endif
+

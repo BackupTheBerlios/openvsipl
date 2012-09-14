@@ -1,0 +1,17 @@
+########################################################################
+#
+# File:   GNUmakefile.inc.in
+# Author: Stefan Seefeld
+# Date:   2009-08-20
+#
+# Contents: Makefile for VSIPL++ Python bindings
+#
+########################################################################
+
+python_math_CXXFLAGS := $(python_CXXFLAGS)
+python_math_LDFLAGS := $(python_LDFLAGS)
+python_math_LIBS := $(python_LIBS)
+
+python_math_ext := 
+
+python_ext += $(patsubst %, math/%, $(python_math_ext))

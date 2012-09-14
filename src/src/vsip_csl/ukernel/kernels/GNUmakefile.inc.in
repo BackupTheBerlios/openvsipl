@@ -1,0 +1,67 @@
+########################################################################
+#
+# File:   GNUmakefile.inc
+# Author: Stefan Seefeld
+# Date:   2009-07-01
+#
+# Contents: Makefile fragment for user kernels.
+#
+########################################################################
+
+########################################################################
+# Variables
+########################################################################
+
+src_vsip_csl_ukernel_kernels_src :=					\
+	$(wildcard $(srcdir)/src/vsip_csl/ukernel/kernels/cbe_accel/*.cpp)
+
+src_vsip_csl_ukernel_kernels_obj := $(patsubst $(srcdir)/%.cpp, %.o,	\
+				    $(src_vsip_csl_ukernel_kernels_src))
+src_vsip_csl_ukernel_kernels_exe := $(patsubst $(srcdir)/%.cpp, %.exe,	\
+				    $(src_vsip_csl_ukernel_kernels_src))
+src_vsip_csl_ukernel_kernels_dump:= $(patsubst $(srcdir)/%.cpp, %.dump,\
+				    $(src_vsip_csl_ukernel_kernels_src))
+src_vsip_csl_ukernel_kernels_img := $(patsubst %.cpp, lib/uk_plugin/%.img,\
+				    $(notdir $(src_vsip_csl_ukernel_kernels_src)))
+
+########################################################################
+# Rules
+########################################################################
+
+$(src_vsip_csl_ukernel_kernels_obj): %.o: %.cpp
+	$(CXX_SPU) -c $(CPP_FLAGS_SPU) $(CXXFLAGS_SPU) -o $@ $<
+
+$(src_vsip_csl_ukernel_kernels_exe): %.exe: %.o
+	$(link_spu_plugin)
+
+$(src_vsip_csl_ukernel_kernels_dump): %.dump: %.exe
+	$(OBJDUMP_SPU) -Dz $< > $@
+
+$(src_vsip_csl_ukernel_kernels_img): lib/uk_plugin/%.img: src/vsip_csl/ukernel/kernels/cbe_accel/%.dump
+	$(CREATE_IMAGE) $< $@
+
+
+
+########################################################################
+# Targets
+########################################################################
+
+install-core:: $(src_vsip_csl_ukernel_kernels_img)
+	$(INSTALL) -d $(DESTDIR)$(libdir)/uk_plugin
+	for file in $(src_vsip_csl_ukernel_kernels_img); do \
+          $(INSTALL_DATA) $$file $(DESTDIR)$(libdir)/uk_plugin; \
+	done
+
+install-svxx::
+	$(call install_headers,vsip_csl/ukernel/kernels/params)
+	$(call install_headers,vsip_csl/ukernel/kernels/host)
+	$(call install_headers,vsip_csl/ukernel/kernels/cbe_accel)
+
+
+libs:: $(src_vsip_csl_ukernel_kernels_img)
+
+mostlyclean::
+	rm -f $(src_vsip_csl_ukernel_kernels_obj)
+	rm -f $(src_vsip_csl_ukernel_kernels_exe)
+	rm -f $(src_vsip_csl_ukernel_kernels_dump)
+	rm -f $(src_vsip_csl_ukernel_kernels_img)

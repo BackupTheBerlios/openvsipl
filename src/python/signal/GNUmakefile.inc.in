@@ -1,0 +1,18 @@
+########################################################################
+#
+# File:   GNUmakefile.inc.in
+# Author: Stefan Seefeld
+# Date:   2009-08-20
+#
+# Contents: Makefile for VSIPL++ Python bindings
+#
+########################################################################
+
+python_signal_CXXFLAGS := $(python_CXXFLAGS)
+python_signal_LDFLAGS := $(python_LDFLAGS)
+python_signal_LIBS := $(python_LIBS)
+
+python_signal_ext := types fft fftm conv corr iir fir window \
+                     histogram freqswap
+
+python_ext += $(patsubst %, signal/%, $(python_signal_ext))

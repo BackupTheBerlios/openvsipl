@@ -1,0 +1,18 @@
+/* This linker script is used for the SPU resident.  It loads the plugin
+ * code at a specific address in SPU memory.  This is accomplished by
+ * creating a variable in a special section called .mybss:
+ *
+ * char code_buffer[128+1*1024] __attribute__((section(".mybss")));
+ *
+ * This linker script places that section at 0x4000 - 128.
+ *
+ * The extra 128 bytes are used to store the plugin header, which contains
+ * function pointers to the input, output, and kernel functions.
+ */
+
+SECTIONS
+{
+  . = 0x4000; . -= 128;
+  .myseg : { *(.mybss) }
+}
+INSERT AFTER .bss

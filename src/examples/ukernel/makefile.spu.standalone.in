@@ -1,0 +1,54 @@
+########################################################################
+#
+# File:   Makefile
+# Author: Stefan Seefeld
+# Date:   2009-06-19
+#
+# Contents: Makefile for VSIPL++ example programs.
+#
+########################################################################
+
+suffix := 
+pkg := vsipl++-spu$(suffix)
+
+include ../common.mk
+
+########################################################################
+# Variables
+########################################################################
+
+libdir	:= $(shell ${pkgcommand} --variable=libdir)
+ld_script:= $(libdir)/plugin-ld.script
+
+OBJDUMP	:= $(shell ${pkgcommand} --variable=objdump)
+CREATE_IMAGE:= $(prefix)/bin/create_plugin_image.pl
+
+
+src := kernels/cbe_accel/vmul.cpp kernels/cbe_accel/cblock.cpp
+obj := $(patsubst %.cpp, %.o, $(src))
+exe := $(patsubst %.cpp, %.exe, $(src))
+dump := $(patsubst %.cpp, %.dump, $(src))
+plugins := vmul.img cblock.img
+
+########################################################################
+# Targets
+########################################################################
+
+all: $(plugins)
+
+########################################################################
+# Rules
+########################################################################
+
+%.o: %.cpp
+	$(CXX) -c -I . $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
+
+%.exe: %.o
+	$(CC) -nostartfiles -Wl,-T,$(ld_script) -o $@ $< $(LIBS)
+
+%.dump: %.exe
+	$(OBJDUMP) -Dz $< > $@
+
+%.img: kernels/cbe_accel/%.dump
+	$(CREATE_IMAGE) $< $@
+

@@ -1,0 +1,17 @@
+########################################################################
+#
+# File:   GNUmakefile.inc.in
+# Author: Stefan Seefeld
+# Date:   2009-08-20
+#
+# Contents: Makefile for VSIPL++ Python bindings
+#
+########################################################################
+
+python_selgen_CXXFLAGS := $(python_CXXFLAGS)
+python_selgen_LDFLAGS := $(python_LDFLAGS)
+python_selgen_LIBS := $(python_LIBS)
+
+python_selgen_ext := selection generation
+
+python_ext += $(patsubst %, selgen/%, $(python_selgen_ext))

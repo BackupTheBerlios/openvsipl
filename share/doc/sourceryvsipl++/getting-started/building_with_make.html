@@ -1,0 +1,17 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>4.2. Building with GNU Make</title><link rel="stylesheet" href="cs.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.74.0"><link rel="home" href="index.html" title="Sourcery VSIPL++"><link rel="up" href="chap-building-applications.html" title="Chapter 4. Building Applications"><link rel="prev" href="chap-building-applications.html" title="Chapter 4. Building Applications"><link rel="next" href="ch04s03.html" title="4.3. Building with Microsoft Visual Studio"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">4.2. Building with GNU Make</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="chap-building-applications.html">Prev</a> </td><th width="60%" align="center">Chapter 4. Building Applications</th><td width="20%" align="right"> <a accesskey="n" href="ch04s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="building_with_make"></a>4.2. Building with GNU Make</h2></div></div></div><p>  
+     A makefile for compiling the example programs is provided in the same
+     directory as the example source files (<code class="filename">/opt/vsip/share/sourceryvsipl++</code>).
+     This example uses the pkg-config command to extract the information 
+     needed to correctly compile an application with the Sourcery VSIPL++
+     library.  Create the executable by entering the <span class="command"><strong>make</strong></span>
+     command from the examples directory (or directory where you have
+     copied the makefile and source files).  For example:
+     </p><pre class="screen">&gt; cd /opt/sourceryvsipl++-2.2-9/share/sourceryvsipl++/
+&gt; make
+g++ -I/opt/sourceryvsipl++-2.2-9/include -o example1 example1.cpp -L/opt/sourceryvsipl++-2.2-9/lib
+  -lsvpp</pre><p>
+     Note that your command line will appear differently depending on
+     install location and configuration options.  As described above,
+     the correct compiler, include paths and library information are
+     obtained automatically.  
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="chap-building-applications.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="chap-building-applications.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch04s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 4. Building Applications </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 4.3. Building with Microsoft Visual Studio</td></tr></table></div></body></html>

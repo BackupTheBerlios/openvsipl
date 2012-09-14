@@ -1,0 +1,64 @@
+Introduction
+============
+
+  Manuals for Sourcery VSIPL++ are written using DocBook.  For more
+  information about DocBook, see:
+
+    http://www.docbook.org
+
+  The DocBook input is processed using XSLT to generate documentation
+  in both HTML and PDF formats.
+
+Organization
+============
+
+  Each manual is placed in its own subdirectory of "doc".  Some common
+  fragments, as well as common build tools are pulled in from an external 
+  csl-docbook tree. Use the --with-csl-docbook configure option to specify 
+  its location.
+
+Common entities
+---------------
+
+  Common entities are provided by extending the DocBook document type via
+  csldoc.dtd. As some of those entities depend on configure options, this
+  file is generated during configuration.
+
+Cross-referencing
+-----------------
+
+  Manuals may link into each other. In order to support this, a 'sitemap' is
+  generated, containing all possible link targets of the set of documents.
+  Then, this sitemap is used during output generation to look up external references.
+  
+
+Conventions
+===========
+
+  Pronouns
+  --------
+   
+  The user is referred to as "you".  The first person ("I" or "we") is
+  never used; refer to CodeSourcery as "CodeSourcery".
+ 
+  Indentation
+  -----------
+  
+  Nested elements are indented one column from their containing
+  elements.
+
+  FIXMEs
+  ------
+
+  If you must check in documentation that is incomplete or incorrect,
+  please mark the areas that need to be fixed with a <note> whose
+  <title> is "FIXME".  For example:
+
+    <note>
+     <title>FIXME</title>
+     <para>An example is needed here.</para>
+    </note>
+
+  Adoping this convention uniformly makes it easier to search for
+  places that require fixing.
+

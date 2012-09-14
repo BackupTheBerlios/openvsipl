@@ -1,0 +1,43 @@
+########################################################################
+#
+# File:   GNUmakefile.inc.in
+# Author: Stefan Seefeld
+# Date:   2006-09-20
+#
+# Contents: Makefile for VSIPL++ Python bindings
+#
+########################################################################
+
+python_CXXFLAGS := @BOOST_CPPFLAGS@ @PYTHON_CPP@
+python_LDFLAGS := @BOOST_LDFLAGS@
+python_LIBS := -Llib -lvsip_csl -lsvpp -lboost_python @PYTHON_LIBS@
+python_dir := lib/python
+python_subdirs := math signal selgen
+
+python_files   := __init__.py
+python_files   += $(patsubst %, %/__init__.py, $(python_subdirs))
+python_targets := $(patsubst %, $(python_dir)/vsip/%, $(python_files))
+
+python_ext := library view png
+
+-include $(patsubst %, python/%/GNUmakefile.inc, $(python_subdirs))
+
+python_sources := $(patsubst %, $(srcdir)/python/%.cpp, $(python_ext))
+python_targets += $(patsubst %, $(python_dir)/vsip/%$(PYTHON_EXT), $(python_ext))
+
+cxx_sources += $(python_sources)
+
+vpath %.cpp $(srcdir)/python
+vpath %.py $(srcdir)/python
+
+all:: $(python_targets)
+
+$(python_dir)/vsip/%.py: %.py
+	@echo copying $(@F)
+	mkdir -p $(@D)
+	cp $< $@
+
+$(python_dir)/vsip/%$(PYTHON_EXT): python/%.$(OBJEXT) | $(libs)
+	mkdir -p $(@D)
+	$(link_dso)
+

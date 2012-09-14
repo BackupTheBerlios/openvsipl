@@ -1,0 +1,52 @@
+########################################################################
+#
+# File:   common.mk.in
+# Author: Stefan Seefeld
+# Date:   2009-05-21
+#
+# Contents: build-system functionality for VSIPL++ example programs.
+#
+########################################################################
+
+########################################################################
+# Variables
+########################################################################
+
+# This should point to the directory where Sourcery VSIPL++ is installed.
+prefix = @prefix@
+
+pkg_config_path := $(prefix)/lib/pkgconfig
+
+# This selects the desired library variants.
+# Please see the Getting Started manual for a complete list 
+# of suffixes appropriate for your system.
+#
+# You may also set it on the command line when invoking make.
+# For example:
+#
+#   $ make suffix=-em64t-ser-builtin
+#
+# would select the x86 64-bit serial-builtin configuration listed in the 
+# pkgconfig/ directory as vsipl++-em64t-ser-builtin.pc. 
+# Note the leading dash.
+#
+suffix := 
+pkg ?= vsipl++$(suffix)
+pkgcommand := PKG_CONFIG_PATH=$(pkg_config_path) pkg-config $(pkg) \
+                --define-variable=prefix=$(prefix)
+
+CC       := $(shell ${pkgcommand} --variable=cc)
+CXX      := $(shell ${pkgcommand} --variable=cxx)
+CFLAGS   := $(shell ${pkgcommand} --cflags) \
+            $(shell ${pkgcommand} --variable=cflags)
+CXXFLAGS := $(shell ${pkgcommand} --cflags) \
+            $(shell ${pkgcommand} --variable=cxxflags)
+LIBS     := $(shell ${pkgcommand} --libs)
+
+
+########################################################################
+# Rules
+########################################################################
+
+%: %.cpp
+	$(CXX) -I . $(CXXFLAGS) -o $@ $< $(LIBS)

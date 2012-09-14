@@ -1,0 +1,77 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>1.2. Blocks</title><link rel="stylesheet" href="cs.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.74.0"><link rel="home" href="index.html" title="Sourcery VSIPL++"><link rel="up" href="chap-ref-api.html" title="Chapter 1. API overview"><link rel="prev" href="chap-ref-api.html" title="Chapter 1. API overview"><link rel="next" href="matlabio.html" title="1.3. Matlab IO"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">1.2. Blocks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="chap-ref-api.html">Prev</a> </td><th width="60%" align="center">Chapter 1. API overview</th><td width="20%" align="right"> <a accesskey="n" href="matlabio.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="blocks"></a>1.2. Blocks</h2></div></div></div><p>
+      The data accessed and manipulated through the View API is actually stored
+      in blocks. Blocks are reference-countable, allowing multiple views to share
+      a single block. However, blocks may themselves be proxies that access their
+      data from other blocks (possibly computing the actual values only when these
+      values are accessed). These blocks are thus not modifiable. They aren't
+      allocated directly by users, but rather internally during the creation of
+      subviews, for example.
+    </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="dense"></a>1.2.1. Dense Blocks</h3></div></div></div><p>
+        The default block type used by all views is <span class="type">Dense</span>, meaning
+        that <span class="type">Vector&lt;float&gt;</span> is actually a shorthand notation
+        for <span class="type">Vector&lt;float, Dense&lt;1, float&gt; &gt;</span>.
+        As such <span class="type">Dense</span> is the most common block type directly used by users.
+        Dense blocks are modifiable and allocatable. They explicitly store one value for each
+        index in the supported domain:
+      </p><pre class="programlisting">// create uninitialized array of size 3
+Dense&lt;1, float&gt; array1(Domain&lt;1&gt;(3));
+
+// create array of size 3 with initial values 0.f
+Dense&lt;1, float&gt; array2(Domain&lt;1&gt;(3), 0.f);
+
+// assign array2 to array1
+array1 = array2;
+
+// access first item
+float value = array1.get(0);
+
+// modify first item
+array1.put(0, 1.f);
+</pre><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="layout"></a>1.2.1.1. Layout</h4></div></div></div><p>
+          Beside the two template parameters already discussed above, <span class="type">Dense</span>
+          provides an optional third parameter to specify its dimension ordering.
+          Using this parameter you can explicitly control whether a 2-dimensional
+          array should be stored in row-major or column-major format:
+        </p><pre class="programlisting">// array using row-major ordering
+Dense&lt;2, float, tuple&lt;0, 1&gt; &gt; rm_array;
+
+// array using column-major ordering
+Dense&lt;2, float, tuple&lt;1, 0&gt; &gt; cm_array;
+</pre><p>
+          Row-major arrays store rows as contiguous chunks of memory. Iterating over
+          its columns will thus access close-by memory regions, reducing cache misses
+          and thus enhancing performance:
+        </p><pre class="programlisting">length_type size = rm_array.size(0);
+for (index_type i = 0; i != size; ++i)
+  rm_array.put(i, 1.f);
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="user-storage"></a>1.2.1.2. User Storage</h4></div></div></div><p>
+          They also allow user-storage to be provided, either at construction time,
+          or later via a call to <code class="function">rebind</code>:
+        </p><pre class="programlisting">float *storage = ...;
+
+// create array operating on user storage
+Dense&lt;1, float&gt; array3(Domain&lt;1&gt;(3), storage);
+
+// create uninitialized array...
+Dense&lt;1, float&gt; array4(Domain&lt;1&gt;(3));
+
+// ...and rebind it to user-storage
+array4.rebind(storage);
+</pre><p>
+          However, special care has to be taken in these cases to synchronize the
+          user storage with the block using it. While the storage is being used via
+          the block it was rebound to, it has to be <span class="emphasis"><em>admitted</em></span>,
+          and <span class="emphasis"><em>released</em></span> in order to be accessed directly, i.e.
+          outside the block.
+        </p><pre class="programlisting">// grant exclusive access to the block
+array3.admit();
+
+// modify it
+array3.put(0, 1.f);
+
+// force synchronization with storage
+array3.release();
+
+// access storage directly
+assert(storage == 1.f);
+</pre></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="chap-ref-api.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="chap-ref-api.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="matlabio.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 1. API overview </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 1.3. Matlab IO</td></tr></table></div></body></html>

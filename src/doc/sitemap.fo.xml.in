@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<targetset xmlns:xi="http://www.w3.org/2003/XInclude">
+  <targetsetinfo>
+    This target database describes the Sourcery VSIPL++ PDF documentation
+    hierarchy.
+  </targetsetinfo>
+
+  <!-- Site map for generating relative paths between documents -->
+  <sitemap>
+    <dir>
+      <document targetdoc="GettingStarted" baseuri="getting-started.pdf">
+        <xi:include href="getting-started.fo.xref"/>
+      </document>
+      <document targetdoc="UsersGuide" baseuri="users-guide.pdf">
+        <xi:include href="users-guide.fo.xref"/>
+      </document>
+      <document targetdoc="ReferenceManual" baseuri="reference-manual.pdf">
+        <xi:include href="reference-manual.fo.xref"/>
+      </document>
+    </dir>
+  </sitemap>
+</targetset>
